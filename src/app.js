@@ -21,8 +21,7 @@ const app = express();
 
 app.use(cors()); // Enable CORS for all requests
 app.use(express.json()); // For parsing application/json
-app.use(middleware.unknownEndpoint);
-app.use(middleware.errorHandler);
+
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
@@ -53,6 +52,7 @@ app.use((error, req, res, next) => {
   res.status(500).send({ message: error.message || 'An unknown error occurred' });
 });
 
-
+app.use(middleware.unknownEndpoint);
+app.use(middleware.errorHandler);
 
 export default app;
