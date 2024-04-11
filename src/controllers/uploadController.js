@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import cloudinary from "nodemon";
+import { v2 as cloudinary } from 'cloudinary';  // Correctly import cloudinary
 
 // Configure Cloudinary
 cloudinary.config({
@@ -19,14 +19,20 @@ const upload = multer({ storage: storage }).single('image');
 const handleFileUpload = (req, res) => {
     upload(req, res, async (err) => {
         if (err) {
+            // Log and respond with the error if Multer encounters an issue
             console.error('Error uploading file:', err);
             return res.status(400).json({ message: err.message });
         }
 
+        // Check if a file is present in the request
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file provided' });
+        }
+
         try {
             // Upload file to Cloudinary and specify folder name
-            const result = await cloudinary.uploader.upload(req.file.buffer.toString('base64'), {
-                folder: 'the_wee_boulangerie' // Replace 'your_folder_name' with your desired folder name
+            const result = await cloudinary.uploader.upload(`data:image/png;base64,${req.file.buffer.toString('base64')}`, {
+                folder: 'the_wee_boulangerie'
             });
 
             // Send response with file information from Cloudinary
@@ -35,6 +41,7 @@ const handleFileUpload = (req, res) => {
                 url: result.secure_url
             });
         } catch (error) {
+            // Log and respond with the error if Cloudinary encounters an issue
             console.error('Error uploading file to Cloudinary:', error);
             res.status(500).json({ message: 'Internal server error' });
         }
