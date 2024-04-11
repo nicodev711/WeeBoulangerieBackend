@@ -10,7 +10,6 @@ import hoursRoutes from './routes/hoursRoutes.js';
 import newsRoutes from "./routes/newsRoutes.js";
 import {dirname, join} from "path";
 import {fileURLToPath} from "url";
-import * as middleware from "./utils/middleware.js";
 
 
 dotenv.config();
@@ -51,8 +50,5 @@ app.use((req, res, next) => {
 app.use((error, req, res, next) => {
   res.status(500).send({ message: error.message || 'An unknown error occurred' });
 });
-
-app.use(middleware.unknownEndpoint);
-app.use(middleware.errorHandler);
 
 export default app;
