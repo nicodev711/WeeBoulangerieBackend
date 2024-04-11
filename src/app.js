@@ -20,8 +20,8 @@ const app = express();
 
 // Define the CORS options
 const corsOptions = {
-  origin: ['http://localhost:3000', 'https://weeboulangeriebackend-production.up.railway.app/'], // Replace 'https://example.com' with your specific URL
-  methods: 'GET,POST,PUT,DELETE', // Allow any method
+  origin: ['http://localhost:3000', 'https://weeboulangeriefrontend-production.up.railway.app'], // Adjusted the URL here
+  methods: 'GET,POST,PUT,DELETE', // Allow these methods
 };
 
 // Enable CORS with the specified options
