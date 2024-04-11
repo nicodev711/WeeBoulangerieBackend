@@ -18,7 +18,14 @@ const __dirname = dirname(__filename);
 
 const app = express();
 
-app.use(cors()); // Enable CORS for all requests
+// Define the CORS options
+const corsOptions = {
+  origin: ['http://localhost:3000', 'https://weeboulangeriebackend-production.up.railway.app/'], // Replace 'https://example.com' with your specific URL
+  methods: 'GET,POST,PUT,DELETE', // Allow any method
+};
+
+// Enable CORS with the specified options
+app.use(cors(corsOptions));
 app.use(express.json()); // For parsing application/json
 
 
