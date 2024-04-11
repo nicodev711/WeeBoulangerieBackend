@@ -1,46 +1,44 @@
 import express from 'express';
 import multer from 'multer';
-import { join, extname } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import cloudinary from "nodemon";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const app = express();
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API_KEY,
+    api_secret: process.env.CLOUD_API_SECRET
+});
 
 // Set up Multer storage
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, join(__dirname, '../uploads/')); // Specify the correct directory where files will be stored
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + extname(file.originalname)); // Append a unique suffix to the filename to avoid overwriting
-    }
-});
+const storage = multer.memoryStorage(); // Using memory storage for multer
 
 // Set up multer upload middleware
 const upload = multer({ storage: storage }).single('image');
 
-// Serve uploaded files statically
-app.use('/uploads', express.static(join(__dirname, '../uploads')));
-
 // Define the controller function for handling file uploads
 const handleFileUpload = (req, res) => {
-    upload(req, res, (err) => {
+    upload(req, res, async (err) => {
         if (err) {
             console.error('Error uploading file:', err);
             return res.status(400).json({ message: err.message });
         }
-        console.log({
-            filename: req.file.filename,
-            url: `https://weeboulangeriebackend-production.up.railway.app/uploads/${req.file.filename}`
-        })
-        // File was uploaded successfully, send response with file information
-        res.json({
-            filename: req.file.filename,
-            url: `https://weeboulangeriebackend-production.up.railway.app/uploads/${req.file.filename}`
-        });
+
+        try {
+            // Upload file to Cloudinary and specify folder name
+            const result = await cloudinary.uploader.upload(req.file.buffer.toString('base64'), {
+                folder: 'the_wee_boulangerie' // Replace 'your_folder_name' with your desired folder name
+            });
+
+            // Send response with file information from Cloudinary
+            res.json({
+                filename: result.original_filename,
+                url: result.secure_url
+            });
+        } catch (error) {
+            console.error('Error uploading file to Cloudinary:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
     });
 };
+
 export default handleFileUpload;
