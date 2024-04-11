@@ -1,30 +1,58 @@
-import express from "express";
-import cors from "cors";
-import morgan from "morgan";
+import dotenv from 'dotenv';
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
 
+import userRoutes from './routes/userRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
+import hoursRoutes from './routes/hoursRoutes.js';
+import newsRoutes from "./routes/newsRoutes.js";
+import {dirname, join} from "path";
+import {fileURLToPath} from "url";
 import * as middleware from "./utils/middleware.js";
-import helloRoute from "./routes/helloRouter.js";
+
+
+dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 
-// parse json request body
-app.use(express.json());
-
-// enable cors
-app.use(cors());
-
-// request logger middleware
-app.use(morgan("tiny"));
-
-// healthcheck endpoint
-app.get("/", (req, res) => {
-  res.status(200).send({ status: "ok" });
-});
-
-app.use("/hello", helloRoute);
-
-// custom middleware
+app.use(cors()); // Enable CORS for all requests
+app.use(express.json()); // For parsing application/json
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error('Could not connect to MongoDB', err));
+
+// Basic route for testing
+app.get('/', (req, res) => {
+  res.send('Boulangerie backend is running...');
+});
+
+// API routes
+app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/uploads', express.static(join(__dirname, './uploads')));
+app.use('/api/hours', hoursRoutes);
+app.use('/api/news', newsRoutes);
+
+
+// Middleware for handling non-existing routes
+app.use((req, res, next) => {
+  res.status(404).send({ message: 'Route not found' });
+});
+
+// Error handling middleware
+app.use((error, req, res, next) => {
+  res.status(500).send({ message: error.message || 'An unknown error occurred' });
+});
+
+
 
 export default app;
