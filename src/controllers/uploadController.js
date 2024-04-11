@@ -34,12 +34,12 @@ const handleFileUpload = (req, res) => {
         }
         console.log({
             filename: req.file.filename,
-            url: `http://localhost:3000/uploads/${req.file.filename}`
+            url: `https://weeboulangeriebackend-production.up.railway.app/uploads/${req.file.filename}`
         })
         // File was uploaded successfully, send response with file information
         res.json({
             filename: req.file.filename,
-            url: `http://localhost:3000/uploads/${req.file.filename}`
+            url: `https://weeboulangeriebackend-production.up.railway.app/uploads/${req.file.filename}`
         });
     });
 };
